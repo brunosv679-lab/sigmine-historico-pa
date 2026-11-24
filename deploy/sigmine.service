@@ -1,0 +1,25 @@
+[Unit]
+Description=SIGMINE Histórico PA — Gunicorn Flask
+After=network.target postgresql.service
+
+[Service]
+User=nathan
+Group=www-data
+WorkingDirectory=/home/nathan/sigmine-historico-pa
+EnvironmentFile=/home/nathan/sigmine-historico-pa/.env
+ExecStart=/home/nathan/sigmine-historico-pa/venv/bin/gunicorn \
+    --workers 4 \
+    --bind 0.0.0.0:8001 \
+    --timeout 120 \
+    --access-logfile /home/nathan/sigmine-historico-pa/logs/gunicorn_access.log \
+    --error-logfile /home/nathan/sigmine-historico-pa/logs/gunicorn_error.log \
+    --log-level info \
+    run:app
+
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/nathan/sigmine-historico-pa/logs/sigmine.log
+StandardError=append:/home/nathan/sigmine-historico-pa/logs/sigmine_error.log
+
+[Install]
+WantedBy=multi-user.target

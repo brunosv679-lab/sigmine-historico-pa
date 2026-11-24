@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Dinâmica Minerária — SIGMINE PA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h4 class="text-warning fw-bold">
+        <i class="bi bi-graph-up-arrow me-2"></i>Dinâmica dos Processos Minerários — Pará
+      </h4>
+      <p class="text-muted small mb-0">
+        Análise temporal das mudanças detectadas pelo pipeline ETL.
+        {% if ultima_etl %}
+          Dados atualizados em {{ ultima_etl.finalizado_em[:10] if ultima_etl.finalizado_em else '—' }}.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <!-- Cards de tipo de mudança -->
+  <div class="row g-3 mb-4" id="cardsResumo">
+    <div class="col-6 col-md-3">
+      <div class="card bg-success bg-opacity-25 border-success h-100">
+        <div class="card-body text-center py-2">
+          <div class="display-6 text-success fw-bold" id="totalNovos">—</div>
+          <div class="small text-muted">Novos (6m)</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-warning bg-opacity-25 border-warning h-100">
+        <div class="card-body text-center py-2">
+          <div class="display-6 text-warning fw-bold" id="totalFase">—</div>
+          <div class="small text-muted">Mudança de Fase</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-info bg-opacity-25 border-info h-100">
+        <div class="card-body text-center py-2">
+          <div class="display-6 text-info fw-bold" id="totalGeometria">—</div>
+          <div class="small text-muted">Mudança Geom.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-danger bg-opacity-25 border-danger h-100">
+        <div class="card-body text-center py-2">
+          <div class="display-6 text-danger fw-bold" id="totalRemovidos">—</div>
+          <div class="small text-muted">Removidos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Gráfico: novos por mês -->
+    <div class="col-lg-8">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+          <span class="text-warning fw-semibold">
+            <i class="bi bi-bar-chart-fill me-1"></i>Novos Requerimentos por Mês
+          </span>
+          <select class="form-select form-select-sm bg-dark text-light border-secondary w-auto" id="selectMeses">
+            <option value="12">Últimos 12 meses</option>
+            <option value="24" selected>Últimos 24 meses</option>
+            <option value="36">Últimos 36 meses</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <canvas id="chartNovosMes" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico: por substância -->
+    <div class="col-lg-4">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-header border-secondary">
+          <span class="text-info fw-semibold">
+            <i class="bi bi-pie-chart-fill me-1"></i>Por Substância (12m)
+          </span>
+        </div>
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <canvas id="chartSubstancia" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mapa de dinâmica -->
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+          <span class="text-warning fw-semibold">
+            <i class="bi bi-map-fill me-1"></i>Mapa de Dinâmica Espacial
+          </span>
+          <div class="btn-group btn-group-sm" role="group" id="btnGrupoTipo">
+            <input type="radio" class="btn-check" name="tipoDinamica" id="rdNovo" value="NOVO" checked autocomplete="off">
+            <label class="btn btn-outline-success" for="rdNovo">Novos</label>
+            <input type="radio" class="btn-check" name="tipoDinamica" id="rdFase" value="FASE" autocomplete="off">
+            <label class="btn btn-outline-warning" for="rdFase">Fase</label>
+            <input type="radio" class="btn-check" name="tipoDinamica" id="rdGeom" value="GEOMETRIA" autocomplete="off">
+            <label class="btn btn-outline-info" for="rdGeom">Geometria</label>
+            <input type="radio" class="btn-check" name="tipoDinamica" id="rdRemovido" value="REMOVIDO" autocomplete="off">
+            <label class="btn btn-outline-danger" for="rdRemovido">Removidos</label>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div id="mapDinamica" style="height:450px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
