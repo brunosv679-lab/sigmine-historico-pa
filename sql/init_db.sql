@@ -13,9 +13,9 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS processos_staging (
     id               SERIAL PRIMARY KEY,
-    numero_processo  VARCHAR(20)  NOT NULL,
+    numero_processo  VARCHAR(50)  NOT NULL,
     nome             TEXT,
-    fase             VARCHAR(100),
+    fase             TEXT,
     ult_evento       TEXT,
     ult_eve_data     DATE,
     area_ha          NUMERIC(14,4),
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS processos_staging (
     uso_solo         TEXT,
     tipo_requerimento TEXT,
     municipio        TEXT,
-    uf               VARCHAR(2),
-    id_original      INTEGER,
+    uf               VARCHAR(50),
+    id_original      TEXT,
     geom             GEOMETRY(MULTIPOLYGON, 4674),
     carregado_em     TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -39,9 +39,9 @@ CREATE INDEX IF NOT EXISTS idx_staging_geom
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS processos_atual (
     id               SERIAL PRIMARY KEY,
-    numero_processo  VARCHAR(20)  NOT NULL UNIQUE,
+    numero_processo  VARCHAR(50)  NOT NULL UNIQUE,
     nome             TEXT,
-    fase             VARCHAR(100),
+    fase             TEXT,
     ult_evento       TEXT,
     ult_eve_data     DATE,
     area_ha          NUMERIC(14,4),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS processos_atual (
     uso_solo         TEXT,
     tipo_requerimento TEXT,
     municipio        TEXT,
-    uf               VARCHAR(2)   DEFAULT 'PA',
+    uf               VARCHAR(50)   DEFAULT 'PA',
     geom             GEOMETRY(MULTIPOLYGON, 4674),
     criado_em        TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     atualizado_em    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -69,9 +69,9 @@ CREATE INDEX IF NOT EXISTS idx_atual_substancia
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS processos_historico (
     id               BIGSERIAL PRIMARY KEY,
-    numero_processo  VARCHAR(20)  NOT NULL,
+    numero_processo  VARCHAR(50)  NOT NULL,
     nome             TEXT,
-    fase             VARCHAR(100),
+    fase             TEXT,
     ult_evento       TEXT,
     ult_eve_data     DATE,
     area_ha          NUMERIC(14,4),
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS processos_historico (
     uso_solo         TEXT,
     tipo_requerimento TEXT,
     municipio        TEXT,
-    uf               VARCHAR(2)   DEFAULT 'PA',
+    uf               VARCHAR(50)   DEFAULT 'PA',
     geom             GEOMETRY(MULTIPOLYGON, 4674),
     -- Metadados SCD2
     tipo_mudanca     VARCHAR(50)  NOT NULL,  -- NOVO, FASE, TITULAR, GEOMETRIA, REMOVIDO

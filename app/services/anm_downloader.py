@@ -11,6 +11,8 @@ import zipfile
 from pathlib import Path
 
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,9 @@ def download_pa_zip(force: bool = False) -> Path:
 
     logger.info("Iniciando download de %s …", ANM_PA_URL)
     try:
-        with requests.get(ANM_PA_URL, stream=True, timeout=300) as resp:
+        # Servidores .gov.br da ANM usam certificado ICP-Brasil frequentemente
+        # ausente no truststore de distribuições Linux padrão (verify=False para compatibilidade)
+        with requests.get(ANM_PA_URL, stream=True, timeout=300, verify=False) as resp:
             resp.raise_for_status()
             total = int(resp.headers.get("content-length", 0))
             downloaded = 0

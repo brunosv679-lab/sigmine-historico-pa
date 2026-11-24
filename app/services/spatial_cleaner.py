@@ -131,10 +131,11 @@ def load_staging(shp_path: Path, execucao_id: int) -> int:
                     municipio, uf, id_original, geom
                 ) VALUES (
                     :numero_processo, :nome, :fase, :ult_evento,
-                    NULLIF(:ult_eve_data, '')::date,
-                    :area_ha::numeric, :substancia, :uso_solo,
-                    :tipo_requerimento, :municipio, :uf, :id_original::integer,
-                    ST_Multi(ST_GeomFromText(:geom_wkt, 4674))
+                    CAST(NULLIF(:ult_eve_data, '') AS DATE),
+                    CAST(:area_ha AS NUMERIC), :substancia, :uso_solo,
+                    :tipo_requerimento, :municipio, :uf,
+                    :id_original,
+                    ST_Force2D(ST_Multi(ST_GeomFromText(:geom_wkt, 4674)))
                 )
             """),
             batch,

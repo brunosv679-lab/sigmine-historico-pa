@@ -68,7 +68,7 @@ def detect_and_apply_changes(execucao_id: int) -> dict[str, int]:
                 s.fase IS DISTINCT FROM a.fase
                 OR s.nome IS DISTINCT FROM a.nome
                 OR NOT ST_Equals(
-                    ST_SnapToGrid(ST_Multi(ST_GeomFromText(s.geom_wkt, 4674)), :snap),
+                    ST_SnapToGrid(s.geom, :snap),
                     ST_SnapToGrid(a.geom, :snap)
                 )
         """), {"snap": SNAP_GRID}).mappings().all()
@@ -120,11 +120,10 @@ def _insert_atual(conn, row) -> None:
             area_ha, substancia, uso_solo, tipo_requerimento,
             municipio, uf, geom
         ) VALUES (
-            :numero_processo, :nome, :fase, :ult_evento,
-            NULLIF(:ult_eve_data, '')::date,
-            :area_ha::numeric, :substancia, :uso_solo,
+            :numero_processo, :nome, :fase, :ult_evento, :ult_eve_data,
+            :area_ha, :substancia, :uso_solo,
             :tipo_requerimento, :municipio, :uf,
-            ST_Multi(ST_GeomFromText(:geom_wkt, 4674))
+            :geom
         )
         ON CONFLICT (numero_processo) DO NOTHING
     """), dict(row))
@@ -133,39 +132,33 @@ def _insert_atual(conn, row) -> None:
 def _update_atual(conn, row) -> None:
     conn.execute(text("""
         UPDATE processos_atual SET
-            nome            = :nome,
-            fase            = :fase,
-            ult_evento      = :ult_evento,
-            ult_eve_data    = NULLIF(:ult_eve_data, '')::date,
-            area_ha         = :area_ha::numeric,
-            substancia      = :substancia,
-            uso_solo        = :uso_solo,
+            nome              = :nome,
+            fase              = :fase,
+            ult_evento        = :ult_evento,
+            ult_eve_data      = :ult_eve_data,
+            area_ha           = :area_ha,
+            substancia        = :substancia,
+            uso_solo          = :uso_solo,
             tipo_requerimento = :tipo_requerimento,
-            municipio       = :municipio,
-            geom            = ST_Multi(ST_GeomFromText(:geom_wkt, 4674)),
-            atualizado_em   = NOW()
+            municipio         = :municipio,
+            geom              = :geom,
+            atualizado_em     = NOW()
         WHERE numero_processo = :numero_processo
     """), dict(row))
 
 
 def _insert_historico(conn, row, tipo_mudanca: str, execucao_id: int) -> None:
-    geom_expr = (
-        "ST_Multi(ST_GeomFromText(:geom_wkt, 4674))"
-        if row.get("geom_wkt")
-        else "NULL"
-    )
-    conn.execute(text(f"""
+    conn.execute(text("""
         INSERT INTO processos_historico (
             numero_processo, nome, fase, ult_evento, ult_eve_data,
             area_ha, substancia, uso_solo, tipo_requerimento,
             municipio, uf, geom,
             tipo_mudanca, valido_de, etl_execucao_id
         ) VALUES (
-            :numero_processo, :nome, :fase, :ult_evento,
-            NULLIF(:ult_eve_data, '')::date,
-            :area_ha::numeric, :substancia, :uso_solo,
+            :numero_processo, :nome, :fase, :ult_evento, :ult_eve_data,
+            :area_ha, :substancia, :uso_solo,
             :tipo_requerimento, :municipio, :uf,
-            {geom_expr},
+            :geom,
             :tipo_mudanca, NOW(), :etl_execucao_id
         )
     """), {
