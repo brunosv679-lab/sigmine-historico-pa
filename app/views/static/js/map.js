@@ -48,21 +48,29 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
     maxZoom: 18,
   });
 
-  // Camadas base (Dark Matter e OpenStreetMap)
-  const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19,
+  // Camadas base gratuitas e sem API Key
+  // 1. Escuro (Padrão): Esri Dark Gray Canvas
+  const darkTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16,
   }).addTo(map);
 
-  const osmTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
+  // 2. Ruas / Claro: OpenStreetMap padrão
+  const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  });
+
+  // 3. Satélite: Esri World Imagery
+  const satTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
     maxZoom: 19,
   });
 
   L.control.layers({
-    'CartoDB Escuro': darkTiles,
-    'OpenStreetMap Padrão': osmTiles,
+    '🌙 Mapa Escuro (Esri)': darkTiles,
+    '☀️ Ruas (OpenStreetMap)': osmTiles,
+    '🛰️ Satélite (Esri)': satTiles,
   }, null, { position: 'topright' }).addTo(map);
 
   let geojsonLayer = null;
@@ -179,15 +187,19 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
   // Botão filtrar
   document.getElementById('btnFiltrar')?.addEventListener('click', carregarProcessos);
 
-  // Inicialização com invalidateSize garantido
+  // Inicialização com invalidateSize garantido em múltiplos tempos
   setTimeout(() => {
     map.invalidateSize();
     carregarProcessos();
-  }, 200);
+  }, 100);
 
   setTimeout(() => {
     map.invalidateSize();
-  }, 600);
+  }, 400);
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 1000);
 
   // Expõe função de histórico global para os popups
   window.carregarHistorico = function(numeroProcesso) {
@@ -256,11 +268,26 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
     zoom: 6,
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: 'abcd',
-    maxZoom: 19,
+  const darkTilesDinamica = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16,
   }).addTo(map);
+
+  const osmTilesDinamica = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
+  });
+
+  const satTilesDinamica = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19,
+  });
+
+  L.control.layers({
+    '🌙 Mapa Escuro': darkTilesDinamica,
+    '☀️ Ruas': osmTilesDinamica,
+    '🛰️ Satélite': satTilesDinamica,
+  }, null, { position: 'topright' }).addTo(map);
 
   const COR_TIPO = {
     NOVO:      '#2ea043',

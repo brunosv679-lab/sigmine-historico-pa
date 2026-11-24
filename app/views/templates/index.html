@@ -3,10 +3,10 @@
 {% block title %}Mapa — SIGMINE Histórico PA{% endblock %}
 
 {% block content %}
-<div class="row g-0 map-layout-container">
+<div class="map-layout-container">
 
-  <!-- Painel lateral -->
-  <div class="col-lg-3 col-md-4 sidebar-panel" id="sidebar">
+  <!-- Painel lateral esquerdo de filtros -->
+  <div class="sidebar-panel" id="sidebar">
     <div class="p-3 border-bottom border-secondary">
       <h6 class="text-warning fw-bold mb-2">
         <i class="bi bi-funnel-fill me-1"></i>Filtros
@@ -75,14 +75,15 @@
     </div>
   </div>
 
-  <!-- Mapa -->
-  <div class="col-lg-9 col-md-8 p-0 map-wrapper">
+  <!-- Mapa interativo Leaflet -->
+  <div class="map-wrapper">
     <div id="map"></div>
-    <!-- Loading -->
+    <!-- Loading overlay -->
     <div id="mapLoading" class="map-loading d-none">
       <div class="spinner-border text-warning" role="status"></div>
     </div>
   </div>
+
 </div>
 {% endblock %}
 
