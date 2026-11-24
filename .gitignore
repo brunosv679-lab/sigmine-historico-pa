@@ -1,47 +1,13 @@
-# Ambiente virtual
 venv/
 .venv/
-env/
-
-# Variáveis de ambiente (NUNCA versionar!)
-.env
-
-# Python cache
 __pycache__/
 *.py[cod]
-*$py.class
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-dist/
-build/
-.eggs/
-
-# Dados brutos (podem ser grandes)
-data/raw/*.zip
-data/raw/*/*.shp
-data/raw/*/*.dbf
-data/raw/*/*.shx
-data/raw/*/*.prj
-data/raw/*/*.cpg
-
-# Logs
-logs/*.log
-logs/*.txt
-
-# IDE e OS
-.idea/
-.vscode/
-*.DS_Store
-Thumbs.db
-*.swp
-*.swo
-
-# Pytest
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Gunicorn
-gunicorn.pid
+.env
+*.log
+.DS_Store
+data/raw/
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg

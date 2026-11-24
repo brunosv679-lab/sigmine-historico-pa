@@ -1,6 +1,6 @@
 """
 Service — Spatial Cleaner
-Validação geométrica (make_valid), encoding cp1252 → utf-8 e reprojeção para SRID 4674.
+Validação geométrica (make_valid), correção de encoding UTF-8/cp1252 e carga em SRID 4674.
 Lê o shapefile com Fiona, valida com Shapely e carrega na tabela processos_staging.
 """
 from __future__ import annotations
@@ -10,8 +10,7 @@ from pathlib import Path
 from typing import Iterator
 
 import fiona
-from fiona import Feature
-from shapely.geometry import shape, mapping, MultiPolygon, Polygon
+from shapely.geometry import shape, MultiPolygon, Polygon
 try:
     from shapely import make_valid
 except ImportError:
@@ -21,7 +20,7 @@ from app.extensions import db
 
 logger = logging.getLogger(__name__)
 
-# Mapeamento de campos do shapefile ANM → colunas do banco
+# Mapeamento de campos do shapefile ANM -> colunas do banco
 FIELD_MAP = {
     "PROCESSO":    "numero_processo",
     "NOME":        "nome",
@@ -41,9 +40,19 @@ TARGET_SRID = 4674  # SIRGAS 2000
 
 
 def _decode_field(value) -> str | None:
-    """Decodifica campos que podem vir como bytes cp1252."""
+    """Decodifica bytes cp1252 e corrige dupla codificação UTF-8 lida como Latin-1."""
+    if value is None:
+        return None
     if isinstance(value, bytes):
-        return value.decode("cp1252", errors="replace")
+        value = value.decode("cp1252", errors="replace")
+    if isinstance(value, str):
+        # Corrige mojibake clássico (ex: 'ALUMÃ\x8dNIO' -> 'ALUMÍNIO', 'ÃGUA' -> 'ÁGUA')
+        if "Ã" in value or "Â" in value:
+            try:
+                fixed = value.encode("latin1").decode("utf-8")
+                return fixed
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                pass
     return value
 
 
@@ -56,7 +65,6 @@ def _to_multipolygon(geom_shape) -> MultiPolygon | None:
     if isinstance(geom_shape, Polygon):
         geom_shape = MultiPolygon([geom_shape])
     elif not isinstance(geom_shape, MultiPolygon):
-        # Tenta converter (ex: GeometryCollection com polígonos)
         polys = [g for g in getattr(geom_shape, "geoms", []) if isinstance(g, (Polygon, MultiPolygon))]
         if not polys:
             return None
@@ -70,16 +78,14 @@ def _to_multipolygon(geom_shape) -> MultiPolygon | None:
 def iter_features_from_shapefile(shp_path: Path) -> Iterator[dict]:
     """
     Itera sobre as feições do shapefile, aplicando:
-    - Decodificação cp1252 → str
+    - Decodificação e normalização UTF-8
     - Validação e correção de geometria (make_valid)
     - Conversão para MultiPolygon
-    Yields dicts com campos mapeados + wkt da geometria.
     """
-    encoding = "cp1252"
     total = 0
     skipped = 0
 
-    with fiona.open(str(shp_path), encoding=encoding) as src:
+    with fiona.open(str(shp_path), encoding="utf-8") as src:
         logger.info(
             "Shapefile: %d feições | CRS: %s",
             len(src),
@@ -112,9 +118,6 @@ def iter_features_from_shapefile(shp_path: Path) -> Iterator[dict]:
 def load_staging(shp_path: Path, execucao_id: int) -> int:
     """
     Trunca a tabela staging e carrega os dados do shapefile.
-
-    Returns:
-        Número de registros carregados.
     """
     inserted = 0
     batch: list[dict] = []

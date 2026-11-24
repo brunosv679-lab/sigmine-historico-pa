@@ -49,3 +49,8 @@ def health():
         return jsonify({"status": "ok", "processos": total}), 200
     except Exception as exc:
         return jsonify({"status": "error", "detail": str(exc)}), 500
+
+
+@web_bp.route("/sobre")
+def sobre():
+    return render_template("sobre.html")
