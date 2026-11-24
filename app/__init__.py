@@ -2,6 +2,7 @@
 Application Factory — cria e configura a aplicação Flask.
 """
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from .config import Config
 from .extensions import db
 
@@ -17,6 +18,15 @@ def create_app(config_object: Config = None) -> Flask:
     if config_object is None:
         config_object = Config()
     app.config.from_object(config_object)
+
+    # ProxyFix para suportar proxy reverso com subrota (ex: /sigmine/)
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+        x_prefix=1,
+    )
 
     # Extensões
     db.init_app(app)

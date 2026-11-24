@@ -3,6 +3,9 @@
  * Carregamento de GeoJSON por BBOX, popups e linha do tempo do processo.
  */
 
+// Prefixo dinâmico para suportar subrota /sigmine/ e raiz /
+const API_BASE = window.location.pathname.startsWith('/sigmine') ? '/sigmine/' : '/';
+
 // Paleta de cores por fase
 const FASE_CORES = {
   'Requerimento de Pesquisa':        '#58a6ff',
@@ -90,7 +93,7 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
     const fase = document.getElementById('filtroFase')?.value || '';
     const substancia = document.getElementById('filtroSubstancia')?.value || '';
 
-    let url = `/api/processos?bbox=${bbox}&limit=2000`;
+    let url = `${API_BASE}api/processos?bbox=${bbox}&limit=2000`;
     if (fase) url += `&fase=${encodeURIComponent(fase)}`;
     if (substancia) url += `&substancia=${encodeURIComponent(substancia)}`;
 
@@ -193,7 +196,7 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
     const timeline = document.getElementById('timeline');
     if (!painel) return;
 
-    fetch(`/api/historico/${encodeURIComponent(numeroProcesso)}`)
+    fetch(`${API_BASE}api/historico/${encodeURIComponent(numeroProcesso)}`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -270,7 +273,7 @@ const BBOX_PADRAO_PA = '-58.90,-9.85,-46.05,2.45';
   let dinamicaLayer = null;
 
   window.carregarDinamica = function(tipo) {
-    fetch(`/api/dinamica?tipo=${tipo}`)
+    fetch(`${API_BASE}api/dinamica?tipo=${tipo}`)
       .then(r => r.json())
       .then(data => {
         if (dinamicaLayer) map.removeLayer(dinamicaLayer);

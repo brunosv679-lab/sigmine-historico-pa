@@ -4,6 +4,9 @@
  * Usado na página dinamica.html
  */
 
+// Prefixo dinâmico para suportar subrota /sigmine/ e raiz /
+const API_BASE = window.location.pathname.startsWith('/sigmine') ? '/sigmine/' : '/';
+
 let chartNovosMes = null;
 let chartSubstancia = null;
 
@@ -23,7 +26,7 @@ function formatarMes(anoMes) {
 
 // --- Gráfico: Novos por Mês ---
 function carregarNovosPorMes(meses = 24) {
-  fetch(`/api/stats/novos-por-mes?meses=${meses}`)
+  fetch(`${API_BASE}api/stats/novos-por-mes?meses=${meses}`)
     .then(r => r.json())
     .then(resp => {
       const dados = resp.data || [];
@@ -77,7 +80,7 @@ function carregarNovosPorMes(meses = 24) {
 
 // --- Gráfico: Por Substância ---
 function carregarPorSubstancia() {
-  fetch('/api/stats/por-substancia?meses=12')
+  fetch(`${API_BASE}api/stats/por-substancia?meses=12`)
     .then(r => r.json())
     .then(resp => {
       const dados = resp.data || [];
@@ -127,7 +130,7 @@ function carregarPorSubstancia() {
 
 // --- Cards de resumo de mudanças ---
 function carregarResumoMudancas() {
-  fetch('/api/stats/mudancas?meses=6')
+  fetch(`${API_BASE}api/stats/mudancas?meses=6`)
     .then(r => r.json())
     .then(resp => {
       const dados = resp.data || [];
