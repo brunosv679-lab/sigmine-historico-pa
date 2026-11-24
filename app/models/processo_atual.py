@@ -23,8 +23,6 @@ def get_processos_por_bbox(
     Retorna processos dentro de um bounding-box como lista de dicts GeoJSON-ready.
     Todos os parâmetros são vinculados (bindparams) — nenhuma interpolação de string.
     """
-    bbox_wkt = f"POLYGON(({min_lon} {min_lat},{max_lon} {min_lat},{max_lon} {max_lat},{min_lon} {max_lat},{min_lon} {min_lat}))"
-
     sql = text("""
         SELECT
             numero_processo,
@@ -36,18 +34,21 @@ def get_processos_por_bbox(
             substancia,
             municipio,
             atualizado_em::text,
-            ST_AsGeoJSON(geom, 6)::json AS geometry
+            ST_AsGeoJSON(ST_Transform(geom, 4326), 6)::json AS geometry
         FROM processos_atual
         WHERE ST_Intersects(
             geom,
-            ST_GeomFromText(:bbox_wkt, 4674)
+            ST_MakeEnvelope(:min_lon, :min_lat, :max_lon, :max_lat, 4674)
         )
         AND (:fase IS NULL OR fase = :fase)
         AND (:substancia IS NULL OR substancia ILIKE :substancia_like)
         ORDER BY area_ha DESC NULLS LAST
         LIMIT :lim
     """).bindparams(
-        bindparam("bbox_wkt", value=bbox_wkt),
+        bindparam("min_lon", value=float(min_lon)),
+        bindparam("min_lat", value=float(min_lat)),
+        bindparam("max_lon", value=float(max_lon)),
+        bindparam("max_lat", value=float(max_lat)),
         bindparam("fase", value=fase),
         bindparam("substancia", value=substancia),
         bindparam("substancia_like", value=f"%{substancia}%" if substancia else None),
@@ -68,7 +69,7 @@ def get_processo_by_numero(numero_processo: str) -> Optional[dict]:
             ult_eve_data::text, area_ha, substancia,
             uso_solo, tipo_requerimento, municipio, uf,
             criado_em::text, atualizado_em::text,
-            ST_AsGeoJSON(geom, 6)::json AS geometry
+            ST_AsGeoJSON(ST_Transform(geom, 4326), 6)::json AS geometry
         FROM processos_atual
         WHERE numero_processo = :np
     """).bindparams(bindparam("np", value=numero_processo))

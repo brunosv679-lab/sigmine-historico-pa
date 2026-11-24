@@ -25,7 +25,7 @@ def get_historico_processo(numero_processo: str) -> list[dict]:
             tipo_mudanca,
             valido_de::text,
             valido_ate::text,
-            ST_AsGeoJSON(geom, 6)::json AS geometry
+            ST_AsGeoJSON(ST_Transform(geom, 4326), 6)::json AS geometry
         FROM processos_historico
         WHERE numero_processo = :np
         ORDER BY valido_de ASC
@@ -105,7 +105,7 @@ def get_dinamica_espacial(tipo_mudanca: str = "NOVO") -> list[dict]:
             h.substancia,
             h.tipo_mudanca,
             h.valido_de::text,
-            ST_AsGeoJSON(h.geom, 6)::json AS geometry
+            ST_AsGeoJSON(ST_Transform(h.geom, 4326), 6)::json AS geometry
         FROM processos_historico h
         WHERE h.tipo_mudanca = :tipo
           AND h.valido_de >= NOW() - INTERVAL '6 months'
