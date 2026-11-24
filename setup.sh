@@ -117,7 +117,7 @@ echo "[7/9] Configurando Nginx…"
 sudo cp "$PROJECT_DIR/deploy/nginx_sigmine.conf" /etc/nginx/sites-available/sigmine
 sudo ln -sf /etc/nginx/sites-available/sigmine /etc/nginx/sites-enabled/sigmine
 sudo nginx -t && sudo systemctl reload nginx
-echo "  ✓ Nginx configurado (porta 8080)"
+echo "  ✓ Nginx configurado (porta 8085)"
 
 # --- 8. Configurar serviço systemd ---
 echo "[8/9] Configurando serviço systemd…"
@@ -136,7 +136,7 @@ echo "  ✓ Cron configurado"
 echo ""
 echo "======================================================"
 echo "  Provisionamento concluído com sucesso!"
-echo "  App: http://$(hostname -I | awk '{print $1}'):8080"
+echo "  App: http://$(hostname -I | awk '{print $1}'):8085"
 echo "  API: http://$(hostname -I | awk '{print $1}'):8001/api/status"
 echo ""
 echo "  Para executar o ETL agora:"

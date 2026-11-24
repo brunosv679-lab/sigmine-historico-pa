@@ -12,8 +12,10 @@ from typing import Iterator
 import fiona
 from fiona import Feature
 from shapely.geometry import shape, mapping, MultiPolygon, Polygon
-from shapely.ops import make_valid
-from shapely.validation import make_valid as shapely_make_valid
+try:
+    from shapely import make_valid
+except ImportError:
+    from shapely.validation import make_valid
 from sqlalchemy import text
 from app.extensions import db
 
