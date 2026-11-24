@@ -114,6 +114,9 @@ echo "  ✓ Schema do banco criado/atualizado"
 
 # --- 7. Configurar Nginx ---
 echo "[7/9] Configurando Nginx…"
+# Garantir permissão de leitura aos arquivos estáticos para o usuário www-data do Nginx
+chmod 755 /home/nathan
+chmod -R 755 "$PROJECT_DIR/app/views/static"
 sudo cp "$PROJECT_DIR/deploy/nginx_sigmine.conf" /etc/nginx/sites-available/sigmine
 sudo ln -sf /etc/nginx/sites-available/sigmine /etc/nginx/sites-enabled/sigmine
 sudo nginx -t && sudo systemctl reload nginx
