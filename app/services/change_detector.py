@@ -159,7 +159,7 @@ def _insert_historico(conn, row, tipo_mudanca: str, execucao_id: int) -> None:
             :area_ha, :substancia, :uso_solo,
             :tipo_requerimento, :municipio, :uf,
             :geom,
-            :tipo_mudanca, NOW(), :etl_execucao_id
+            :tipo_mudanca, COALESCE(CAST(:ult_eve_data AS TIMESTAMP), NOW()), :etl_execucao_id
         )
     """), {
         **dict(row),

@@ -131,7 +131,14 @@ def load_staging(shp_path: Path, execucao_id: int) -> int:
                     municipio, uf, id_original, geom
                 ) VALUES (
                     :numero_processo, :nome, :fase, :ult_evento,
-                    CAST(NULLIF(:ult_eve_data, '') AS DATE),
+                    COALESCE(
+                        CAST(NULLIF(:ult_eve_data, '') AS DATE),
+                        CASE
+                            WHEN :ult_evento ~ '[0-9]{2}/[0-9]{2}/[0-9]{4}'
+                            THEN TO_DATE(substring(:ult_evento from '([0-9]{2}/[0-9]{2}/[0-9]{4})'), 'DD/MM/YYYY')
+                            ELSE NULL
+                        END
+                    ),
                     CAST(:area_ha AS NUMERIC), :substancia, :uso_solo,
                     :tipo_requerimento, :municipio, :uf,
                     :id_original,
